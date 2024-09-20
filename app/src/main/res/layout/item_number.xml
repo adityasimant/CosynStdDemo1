@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvNumber"
+    android:layout_width="50dp"
+    android:layout_height="50dp"
+    android:layout_margin="8dp"
+    android:background="@drawable/pagebackground"
+    android:gravity="center"
+    android:padding="16dp"
+    android:text="1"
+    android:textColor="@android:color/white"
+    android:textSize="12sp"
+    />
