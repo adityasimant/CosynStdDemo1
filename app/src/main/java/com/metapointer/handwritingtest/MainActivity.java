@@ -22,13 +22,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NumberAdapter.OnNumberClickListener {
     private DrawingView drawingView;
-    private TextView pageNumberTextView;
+    private RecyclerView recyclerView;
+    private NumberAdapter numberAdapter;
 
-    private PageIndicatorView pageIndicatorView;
-    RecyclerView recyclerView;
-    NumberAdapter numberAdapter;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -39,10 +37,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        recyclerView = findViewById(R.id.recyclerView);
 
+        recyclerView = findViewById(R.id.recyclerView);
         drawingView = findViewById(R.id.drawing_view);
-//        pageIndicatorView = findViewById(R.id.page_indicator);
 
         MaterialCardView clearButton = findViewById(R.id.clear_button);
         Button saveButton = findViewById(R.id.save_button);
@@ -57,30 +54,23 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Set adapter
-        numberAdapter = new NumberAdapter(numbers);
+        numberAdapter = new NumberAdapter(this, numbers, this);
         recyclerView.setAdapter(numberAdapter);
 
         clearButton.setOnClickListener(v -> drawingView.clearCanvas());
         saveButton.setOnClickListener(v -> drawingView.saveDrawing(MainActivity.this));
 
-//        pageIndicatorView.setTotalPages(DrawingView.TOTAL_PAGES);
-//        pageIndicatorView.setOnPageChangeListener(newPage -> {
-//            drawingView.setCurrentPage(newPage - 1);  // DrawingView uses 0-based index
-//            updatePageNumber();
-//        });
-
-//        updatePageNumber();
-
         // Restore drawing if the app was restarted
         drawingView.restoreDrawing(this);
         verifyStoragePermissions(this);
     }
-//
-//    private void updatePageNumber() {
-//        int currentPage = drawingView.getCurrentPage() + 1;  // Convert to 1-based index
-//        pageIndicatorView.setCurrentPage(currentPage);
-//    }
 
+    @Override
+    public void onNumberClick(int number) {
+        drawingView.setCurrentPage(number - 1);  // DrawingView uses 0-based index
+        numberAdapter.setSelectedPosition(number - 1);
+        recyclerView.smoothScrollToPosition(number - 1);
+    }
 
     public static void verifyStoragePermissions(Activity activity) {
         // Check if we have write permission
