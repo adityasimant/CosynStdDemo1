@@ -2,6 +2,8 @@ package com.metapointer.handwritingtest;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Activity;
@@ -17,9 +19,13 @@ import com.google.android.material.card.MaterialCardView;
 
 import java.io.File;
 import java.text.DecimalFormat;
-public class MainActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements NumberAdapter.OnNumberClickListener {
     private DrawingView drawingView;
-    private TextView pageNumberTextView;
+    private RecyclerView recyclerView;
+    private NumberAdapter numberAdapter;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -32,36 +38,38 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        recyclerView = findViewById(R.id.recyclerView);
         drawingView = findViewById(R.id.drawing_view);
-        pageNumberTextView = findViewById(R.id.page_number_text);
 
         MaterialCardView clearButton = findViewById(R.id.clear_button);
         Button saveButton = findViewById(R.id.save_button);
-        ImageView prevPageButton = findViewById(R.id.prev_page_button);
-        ImageView nextPageButton = findViewById(R.id.next_page_button);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        recyclerView.setLayoutManager(layoutManager);
+
+        // Create list of numbers from 1 to 30
+        List<Integer> numbers = new ArrayList<>();
+        for (int i = 1; i <= DrawingView.TOTAL_PAGES; i++) {
+            numbers.add(i);
+        }
+
+        // Set adapter
+        numberAdapter = new NumberAdapter(this, numbers, this);
+        recyclerView.setAdapter(numberAdapter);
 
         clearButton.setOnClickListener(v -> drawingView.clearCanvas());
         saveButton.setOnClickListener(v -> drawingView.saveDrawing(MainActivity.this));
-
-        prevPageButton.setOnClickListener(v -> {
-            drawingView.previousPage();
-            updatePageNumber();
-        });
-
-        nextPageButton.setOnClickListener(v -> {
-            drawingView.nextPage();
-            updatePageNumber();
-        });
-
-        updatePageNumber();
 
         // Restore drawing if the app was restarted
         drawingView.restoreDrawing(this);
         verifyStoragePermissions(this);
     }
 
-    private void updatePageNumber() {
-        pageNumberTextView.setText("Page " + drawingView.getCurrentPage());
+    @Override
+    public void onNumberClick(int number) {
+        drawingView.setCurrentPage(number - 1);  // DrawingView uses 0-based index
+        numberAdapter.setSelectedPosition(number - 1);
+        recyclerView.smoothScrollToPosition(number - 1);
     }
 
     public static void verifyStoragePermissions(Activity activity) {

@@ -38,7 +38,7 @@ public class DrawingView extends View {
     private int currentPage = 0;
 
     // initialise the total pages from config api
-    private static final int TOTAL_PAGES = 30; //placeHolder Value
+    public static final int TOTAL_PAGES = 30; //placeHolder Value
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -136,6 +136,18 @@ public class DrawingView extends View {
             invalidate();
         }
     }
+    public void setCurrentPage(int page) {
+        if (page >= 0 && page < TOTAL_PAGES) {
+            currentPage = page;
+            currentPagePaths = paths.get(currentPage);
+            currentPagePathPoints = allPathPoints.get(currentPage);
+            invalidate();
+        }
+    }
+
+    public int getCurrentPage() {
+        return currentPage;
+    }
 
     public void previousPage() {
         if (currentPage > 0) {
@@ -147,9 +159,9 @@ public class DrawingView extends View {
         }
     }
 
-    public int getCurrentPage() {
-        return currentPage + 1;
-    }
+//    public int getCurrentPage() {
+//        return currentPage + 1;
+//    }
 
     public void saveDrawing(Context context) {
         if (!isExternalStorageWritable()) {
@@ -170,6 +182,7 @@ public class DrawingView extends View {
                 }
                 builder.append("||");
             }
+            // Need to write the compression process here
             fos.write(builder.toString().getBytes());
             Toast.makeText(context, "Drawing saved to public location!", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
@@ -190,6 +203,8 @@ public class DrawingView extends View {
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+
+            // rewrite this logic for a compressed file scenario
             String line = br.readLine();
             if (line != null) {
                 String[] pages = line.split("\\|\\|");
